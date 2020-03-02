@@ -5,13 +5,20 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, ChromeTabs, ChromeTabsClasses,
-  Vcl.StdCtrls;
+  Vcl.StdCtrls, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  cxPC, Vcl.ExtCtrls;
 
 type
   TForm1 = class(TForm)
     ChromeTabs1: TChromeTabs;
-    PageControl1: TPageControl;
     Memo1: TMemo;
+    Button1: TButton;
+    cxPageControl1: TcxPageControl;
+    Panel1: TPanel;
+    Button2: TButton;
+    Edit1: TEdit;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure ChromeTabs1ActiveTabChanged(Sender: TObject; ATab: TChromeTab);
     procedure ChromeTabs1ActiveTabChanging(Sender: TObject; AOldTab, ANewTab:
         TChromeTab; var Allow: Boolean);
@@ -20,6 +27,8 @@ type
         Close: Boolean);
     procedure ChromeTabs1NeedDragImageControl(Sender: TObject; ATab: TChromeTab;
         var DragControl: TWinControl);
+    procedure ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer; State:
+        TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -48,23 +57,36 @@ begin
   Result.ImageIndex := ImageIndex;
 end;
 
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  cxPageControl1.Pages[StrToInt(Edit1.Text)].Free;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+  Memo1.Lines.Clear;
+end;
+
 procedure TForm1.ChromeTabs1ActiveTabChanged(Sender: TObject; ATab: TChromeTab);
 begin
-//  Log('Event', 'changed' + IntToStr(ATab.Index));
-//  PageControl1.ActivePageIndex := ATab.Index;
+//  Log('ActiveTabChangedEvent', '[tabIndex: ' + IntToStr(ATab.Index) + ']');
+  if ChromeTabs1.Tabs.Count = cxPageControl1.PageCount then
+    cxPageControl1.ActivePageIndex := ATab.Index;
+
+  Text := cxPageControl1.ActivePage.Caption;
 end;
 
 procedure TForm1.ChromeTabs1ActiveTabChanging(Sender: TObject; AOldTab,
     ANewTab: TChromeTab; var Allow: Boolean);
 begin
-//  Log('Event', 'Changing, old: ' + IntToStr(AOldTab.Index) + ', new: ' + IntToStr(ANewTab.Index));
-  PageControl1.ActivePageIndex := ANewTab.Index;
+//  Log('ActiveTabChangingEvent', '[newTabIndex: ' + IntToStr(ANewTab.Index) + ']');
+//  cxPageControl1.ActivePageIndex := ANewTab.Index;
 end;
 
 procedure TForm1.ChromeTabs1ButtonAddClick(Sender: TObject; var Handled:
     Boolean);
 var sTabTitle: string;
-    tabSheet : TTabSheet;
+    tabSheet : TcxTabSheet;
     currentCount : integer;
     NewForm2 : TForm2;
     NewForm1 : TForm1;
@@ -72,8 +94,8 @@ begin
   // get current chrome tabs index
   currentCount := (Sender as TChromeTabs).Tabs.Count;
 
-  // log
-  Log('Event', 'Add Tab');
+  // Log
+  Log('ButtonAddClickEvent', '[TabIndex: ' + IntToStr(currentCount) + ']');
 
   // add new tab
   sTabTitle := 'New' + IntToStr(currentCount);
@@ -81,14 +103,17 @@ begin
   Handled := TRUE;
 
   // add new page
-  tabSheet := TTabSheet.Create(Nil);
+  tabSheet := TcxTabSheet.Create(Nil);
   with tabSheet do begin
-    PageControl := PageControl1;
+    PageControl := cxPageControl1;
     Name := 'page' + IntToStr(currentCount);
     caption := 'page' + IntToStr(currentCount);
-    TabVisible := False;
+//    TabVisible := False;
   end;
-  PageControl1.ActivePageIndex := currentCount;
+  cxPageControl1.ActivePageIndex := currentCount;
+
+  // change form title
+  Text := tabSheet.Caption;
 
   // create new form, embedded to page control
   NewForm2 := TForm2.Create(Application);
@@ -98,39 +123,51 @@ begin
   NewForm2.Button1.Caption := 'button' + IntToStr(currentCount);
   NewForm2.Show;
 
-  // change form title
-  Text := 'title' + IntToStr(currentCount);
+
 end;
 
 procedure TForm1.ChromeTabs1ButtonCloseTabClick(Sender: TObject; ATab:
     TChromeTab; var Close: Boolean);
 begin
-  Log('TabIndex', IntToStr(ATab.Index));
-//  Log('Active page tab index', IntToStr(PageControl1.ActivePageIndex));
-//  Log('Active page tab count', IntToStr(PageControl1.PageCount));
+  Log('ButtonCloseTabClickEvent', 'TabIndex' + IntToStr(ATab.Index));
+//  Log('Active page tab index', IntToStr(cxPageControl1.ActivePageIndex));
+//  Log('Active page tab count', IntToStr(cxPageControl1.PageCount));
 
   // free closed page
-  PageControl1.Pages[ATab.Index].Free;
+  cxPageControl1.Pages[ATab.Index].Free;
 
-  // set active page inde to new page
-  PageControl1.ActivePageIndex := ChromeTabs1.ActiveTabIndex - 1;
+  // set active page index to new page
+//  cxPageControl1.ActivePageIndex := ChromeTabs1.ActiveTabIndex - 1;
+
 end;
 
 procedure TForm1.ChromeTabs1NeedDragImageControl(Sender: TObject; ATab:
     TChromeTab; var DragControl: TWinControl);
 begin
   // set drag image
-  DragControl := PageControl1.Pages[ATab.Index];
+  DragControl := cxPageControl1.Pages[ATab.Index];
+end;
+
+procedure TForm1.ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer; State:
+    TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
+var Tabs : TChromeTabs;
+begin
+  Tabs := Sender as TChromeTabs;
+  if Tabs.ActiveDragTabObject <> nil then begin
+//    Log('drag index', IntToStr(Tabs.ActiveDragTabObject.DragTab.Index));
+//    Log('drop index', IntToStr(Tabs.ActiveDragTabObject.DropTabIndex));
+    cxPageControl1.Pages[cxPageControl1.ActivePageIndex].PageIndex := Tabs.ActiveDragTabObject.DropTabIndex;
+  end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var page : integer;
 begin
-  for page := 0 to PageControl1.PageCount - 1 do begin
-    PageControl1.Pages[page].TabVisible := false;
+  for page := 0 to cxPageControl1.PageCount - 1 do begin
+    cxPageControl1.Pages[page].TabVisible := false;
   end;
 
-  PageControl1.ActivePageIndex := -1;
+  cxPageControl1.ActivePageIndex := -1;
 end;
 
 procedure TForm1.Log(aTitle, aContent: string);

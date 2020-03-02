@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 333
-  ClientWidth = 537
+  ClientHeight = 468
+  ClientWidth = 828
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,13 +17,14 @@ object Form1: TForm1
   object ChromeTabs1: TChromeTabs
     Left = 0
     Top = 0
-    Width = 537
+    Width = 828
     Height = 30
     OnActiveTabChanging = ChromeTabs1ActiveTabChanging
     OnActiveTabChanged = ChromeTabs1ActiveTabChanged
     OnButtonAddClick = ChromeTabs1ButtonAddClick
     OnButtonCloseTabClick = ChromeTabs1ButtonCloseTabClick
     OnNeedDragImageControl = ChromeTabs1NeedDragImageControl
+    OnTabDragOver = ChromeTabs1TabDragOver
     ActiveTabIndex = -1
     Options.Display.CloseButton.Offsets.Vertical = 6
     Options.Display.CloseButton.Offsets.Horizontal = 2
@@ -344,25 +345,64 @@ object Form1: TForm1
     LookAndFeel.ScrollButtons.Arrow.Disabled.OutlineAlpha = 200
     Align = alTop
     TabOrder = 0
-    ExplicitTop = -6
+    ExplicitTop = -5
   end
-  object PageControl1: TPageControl
-    Left = 161
+  object cxPageControl1: TcxPageControl
+    Left = 185
     Top = 30
-    Width = 376
-    Height = 303
+    Width = 643
+    Height = 438
     Align = alClient
     TabOrder = 1
-    ExplicitLeft = 0
-    ExplicitWidth = 537
+    Properties.CustomButtons.Buttons = <>
+    ClientRectBottom = 434
+    ClientRectLeft = 4
+    ClientRectRight = 639
+    ClientRectTop = 4
   end
-  object Memo1: TMemo
+  object Panel1: TPanel
     Left = 0
     Top = 30
-    Width = 161
-    Height = 303
+    Width = 185
+    Height = 438
     Align = alLeft
+    Caption = 'Panel1'
     TabOrder = 2
-    ExplicitTop = 36
+    object Memo1: TMemo
+      Left = 1
+      Top = 26
+      Width = 183
+      Height = 365
+      Align = alClient
+      TabOrder = 0
+    end
+    object Button1: TButton
+      Left = 1
+      Top = 412
+      Width = 183
+      Height = 25
+      Align = alBottom
+      Caption = 'delete tab'
+      TabOrder = 1
+      OnClick = Button1Click
+    end
+    object Button2: TButton
+      Left = 1
+      Top = 1
+      Width = 183
+      Height = 25
+      Align = alTop
+      Caption = 'clear'
+      TabOrder = 2
+      OnClick = Button2Click
+    end
+    object Edit1: TEdit
+      Left = 1
+      Top = 391
+      Width = 183
+      Height = 21
+      Align = alBottom
+      TabOrder = 3
+    end
   end
 end
