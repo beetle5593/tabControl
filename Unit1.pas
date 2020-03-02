@@ -18,6 +18,8 @@ type
     procedure ChromeTabs1ButtonAddClick(Sender: TObject; var Handled: Boolean);
     procedure ChromeTabs1ButtonCloseTabClick(Sender: TObject; ATab: TChromeTab; var
         Close: Boolean);
+    procedure ChromeTabs1NeedDragImageControl(Sender: TObject; ATab: TChromeTab;
+        var DragControl: TWinControl);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -112,6 +114,13 @@ begin
 
   // set active page inde to new page
   PageControl1.ActivePageIndex := ChromeTabs1.ActiveTabIndex - 1;
+end;
+
+procedure TForm1.ChromeTabs1NeedDragImageControl(Sender: TObject; ATab:
+    TChromeTab; var DragControl: TWinControl);
+begin
+  // set drag image
+  DragControl := PageControl1.Pages[ATab.Index];
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
