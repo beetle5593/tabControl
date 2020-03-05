@@ -25,6 +25,7 @@ object Form1: TForm1
     OnButtonCloseTabClick = ChromeTabs1ButtonCloseTabClick
     OnNeedDragImageControl = ChromeTabs1NeedDragImageControl
     OnTabDragOver = ChromeTabs1TabDragOver
+    OnTabDragDrop = ChromeTabs1TabDragDrop
     ActiveTabIndex = -1
     Options.Display.CloseButton.Offsets.Vertical = 6
     Options.Display.CloseButton.Offsets.Horizontal = 2
@@ -345,7 +346,6 @@ object Form1: TForm1
     LookAndFeel.ScrollButtons.Arrow.Disabled.OutlineAlpha = 200
     Align = alTop
     TabOrder = 0
-    ExplicitTop = -5
   end
   object cxPageControl1: TcxPageControl
     Left = 185
