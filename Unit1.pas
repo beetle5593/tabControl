@@ -32,8 +32,8 @@ type
     procedure ChromeTabs1TabDragDrop(Sender: TObject; X, Y: Integer;
       DragTabObject: IDragTabObject; Cancelled: Boolean;
       var TabDropOptions: TTabDropOptions);
-    procedure ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer;
-      State: TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
+    procedure ChromeTabs1TabDragDropped(Sender: TObject; DragTabObject:
+        IDragTabObject; NewTab: TChromeTab);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -87,6 +87,7 @@ end;
 procedure TForm1.ChromeTabs1ActiveTabChanged(Sender: TObject; ATab: TChromeTab);
 begin
 //   Log((cxPageControl1.FindChildControl('a1') as TcxTabSheet).Caption, '');
+
 
   if ChromeTabs1.Tabs.Count = cxPageControl1.PageCount then
     cxPageControl1.ActivePageIndex := (cxPageControl1.FindChildControl('a' + InttoStr(ATab.ID)) as TcxTabSheet).TabIndex;
@@ -168,36 +169,6 @@ begin
   DragControl := cxPageControl1.Pages[ATab.Index];
 end;
 
-procedure TForm1.ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer;
-  State: TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
-var
-  Tabs: TChromeTabs;
-  tabSheet: TcxTabSheet;
-begin
-  Tabs := Sender as TChromeTabs;
-//  if ChromeTabs1.Tabs.Count <> cxPageControl1.PageCount then begin
-//
-//    // add new page
-//    tabSheet := TcxTabSheet.Create(Nil);
-//    with tabSheet do
-//    begin
-//      PageControl := cxPageControl1;
-//      Name := 'New';
-//      Caption := 'New';
-//      // TabVisible := False;
-//    end;
-//    cxPageControl1.ActivePageIndex := cxPageControl1.PageCount -1 ;
-//  end;
-
-//  if Tabs.ActiveDragTabObject <> nil then
-//  begin
-//     Log('drag index', IntToStr(Tabs.ActiveDragTabObject.DragTab.Index));
-//     Log('drop index', IntToStr(Tabs.ActiveDragTabObject.DropTabIndex));
-//    cxPageControl1.Pages[cxPageControl1.ActivePageIndex].PageIndex :=
-//      Tabs.ActiveDragTabObject.DropTabIndex;
-//  end;
-end;
-
 procedure TForm1.FormCreate(Sender: TObject);
 var
   page: Integer;
@@ -242,11 +213,15 @@ begin
     NewForm.Top := WinY;
     SetAppID(NewForm.Handle, 'test1');
 
+    NewForm.AddTab(NewForm.ChromeTabs1, ChromeTabs1.ActiveTab.Caption, -1);
+    NewForm.Show;
+
     tabSheet := cxPageControl1.ActivePage;
     tabSheet.PageControl := NewForm.cxPageControl1;
+    tabSheet.Name := 'a' + inttostr(id);
 //    Log('tabsheet', tabSheet.Caption);
-    NewForm.AddTab(NewForm.ChromeTabs1, tabSheet.Caption, -1);
-    NewForm.Show;
+
+
     {$endregion}
 
     Log(IntToStr(cxPageControl1.ActivePageIndex), IntToStr(NewForm.cxPageControl1.ActivePageIndex));
@@ -273,6 +248,24 @@ end;
 // ------------------------------------------------------------------------------
 function SHGetPropertyStoreForWindow(hwnd: hwnd; const riid: TGUID;
   out ppv: IPropertyStore): HRESULT; stdcall; external 'shell32.dll';
+
+procedure TForm1.ChromeTabs1TabDragDropped(Sender: TObject; DragTabObject:
+    IDragTabObject; NewTab: TChromeTab);
+var Tabs: TChromeTabs;
+    tabSheet: TcxTabSheet;
+begin
+//  Tabs := Sender as TChromeTabs;
+//  if ChromeTabs1.Tabs.Count <> cxPageControl1.PageCount then begin
+//
+
+//    tabSheet := cxPageControl1.ActivePage;
+//    tabSheet.PageControl := Form1.cxPageControl1;
+//    tabSheet.Name := 'a' + inttostr(id);
+//
+//    cxPageControl1.ActivePageIndex := cxPageControl1.PageCount -1 ;
+//  end;
+  Log('a', 'a');
+end;
 
 function TForm1.GetAppID(AHandle: THandle): string;
 var

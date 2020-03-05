@@ -24,8 +24,8 @@ object Form1: TForm1
     OnButtonAddClick = ChromeTabs1ButtonAddClick
     OnButtonCloseTabClick = ChromeTabs1ButtonCloseTabClick
     OnNeedDragImageControl = ChromeTabs1NeedDragImageControl
-    OnTabDragOver = ChromeTabs1TabDragOver
     OnTabDragDrop = ChromeTabs1TabDragDrop
+    OnTabDragDropped = ChromeTabs1TabDragDropped
     ActiveTabIndex = -1
     Options.Display.CloseButton.Offsets.Vertical = 6
     Options.Display.CloseButton.Offsets.Horizontal = 2
