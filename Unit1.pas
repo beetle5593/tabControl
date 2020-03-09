@@ -19,6 +19,7 @@ type
     Panel1: TPanel;
     Button2: TButton;
     Edit1: TEdit;
+    ChromeTabs2: TChromeTabs;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure ChromeTabs1ActiveTabChanged(Sender: TObject; ATab: TChromeTab);
@@ -32,8 +33,12 @@ type
     procedure ChromeTabs1TabDragDrop(Sender: TObject; X, Y: Integer;
       DragTabObject: IDragTabObject; Cancelled: Boolean;
       var TabDropOptions: TTabDropOptions);
+    procedure ChromeTabs1TabDragDropped(Sender: TObject; DragTabObject:
+        IDragTabObject; NewTab: TChromeTab);
     procedure ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer;
       State: TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
+    procedure ChromeTabs1TabDragStart(Sender: TObject; ATab: TChromeTab; var Allow:
+        Boolean);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -72,14 +77,14 @@ begin
   Result.ImageIndex := ImageIndex;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
-begin
-  cxPageControl1.Pages[StrToInt(Edit1.Text)].Free;
-end;
-
 procedure TForm1.Button2Click(Sender: TObject);
 begin
   Memo1.Lines.Clear;
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  cxPageControl1.Pages[StrToInt(Edit1.Text)].Free;
 end;
 
 procedure TForm1.ChromeTabs1ActiveTabChanged(Sender: TObject; ATab: TChromeTab);
@@ -142,6 +147,36 @@ begin
 
 end;
 
+procedure TForm1.ChromeTabs1NeedDragImageControl(Sender: TObject;
+  ATab: TChromeTab; var DragControl: TWinControl);
+begin
+  // set drag image
+  if ATab.Index < cxPageControl1.PageCount then
+    DragControl := cxPageControl1.Pages[ATab.Index];
+end;
+
+procedure TForm1.ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer;
+  State: TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
+var
+  Tabs: TChromeTabs;
+begin
+
+  Tabs := Sender as TChromeTabs;
+  if Tabs.ActiveDragTabObject <> nil then
+  begin
+//    Log('DragOverEvent', '[DragTabIndex: ' + IntToStr(Tabs.ActiveDragTabObject.DragTab.Index) + ']');
+//    Log('DragOverEvent', '[DropTabIndex: ' + IntToStr(Tabs.ActiveDragTabObject.DropTabIndex) + ']');
+//    Log('DragOverEvent', '[ChromeTabCount: ' + IntToStr(ChromeTabs1.Tabs.Count) + ', PageCount: ' + IntToStr(cxPageControl1.PageCount) + ']');
+//    Log('DragOverEvent', '[ActiveTabsIndex: ' + IntToStr(Tabs.ActiveTabIndex) + ', ActivePageIndex: ' + IntToStr(cxPageControl1.ActivePageIndex) + ']');
+
+    // Log('drag index', IntToStr(Tabs.ActiveDragTabObject.DragTab.Index));
+    // Log('drop index', IntToStr(Tabs.ActiveDragTabObject.DropTabIndex));
+    if Tabs.ActiveDragTabObject.DropTabIndex < cxPageControl1.PageCount then
+      cxPageControl1.Pages[cxPageControl1.ActivePageIndex].PageIndex :=
+        Tabs.ActiveDragTabObject.DropTabIndex;
+  end;
+end;
+
 procedure TForm1.ChromeTabs1ButtonCloseTabClick(Sender: TObject;
   ATab: TChromeTab; var Close: Boolean);
 begin
@@ -155,28 +190,6 @@ begin
   // set active page index to new page
   // cxPageControl1.ActivePageIndex := ChromeTabs1.ActiveTabIndex - 1;
 
-end;
-
-procedure TForm1.ChromeTabs1NeedDragImageControl(Sender: TObject;
-  ATab: TChromeTab; var DragControl: TWinControl);
-begin
-  // set drag image
-  DragControl := cxPageControl1.Pages[ATab.Index];
-end;
-
-procedure TForm1.ChromeTabs1TabDragOver(Sender: TObject; X, Y: Integer;
-  State: TDragState; DragTabObject: IDragTabObject; var Accept: Boolean);
-var
-  Tabs: TChromeTabs;
-begin
-  Tabs := Sender as TChromeTabs;
-  if Tabs.ActiveDragTabObject <> nil then
-  begin
-    // Log('drag index', IntToStr(Tabs.ActiveDragTabObject.DragTab.Index));
-    // Log('drop index', IntToStr(Tabs.ActiveDragTabObject.DropTabIndex));
-    cxPageControl1.Pages[cxPageControl1.ActivePageIndex].PageIndex :=
-      Tabs.ActiveDragTabObject.DropTabIndex;
-  end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -223,17 +236,13 @@ begin
     NewForm.Top := WinY;
     SetAppID(NewForm.Handle, 'test1');
 
-
     tabSheet := cxPageControl1.ActivePage;
     tabSheet.PageControl := NewForm.cxPageControl1;
-
 
     NewForm.AddTab(NewForm.ChromeTabs1, tabSheet.Caption, -1);
 
     NewForm.Show;
     {$endregion}
-
-    Log(IntToStr(cxPageControl1.ActivePageIndex), IntToStr(NewForm.cxPageControl1.ActivePageIndex));
 
     // Remove the original tab
     TabDropOptions := [tdDeleteDraggedTab];
@@ -256,6 +265,19 @@ end;
 // ------------------------------------------------------------------------------
 function SHGetPropertyStoreForWindow(hwnd: hwnd; const riid: TGUID;
   out ppv: IPropertyStore): HRESULT; stdcall; external 'shell32.dll';
+
+procedure TForm1.ChromeTabs1TabDragDropped(Sender: TObject; DragTabObject:
+    IDragTabObject; NewTab: TChromeTab);
+var pageControl : TcxPageControl;
+begin
+  Log('TabDragDroppedEvent', '[NewIndex: ' + IntToStr(newtab.Index) + ']');
+end;
+
+procedure TForm1.ChromeTabs1TabDragStart(Sender: TObject; ATab: TChromeTab; var
+    Allow: Boolean);
+begin
+  Log('TabDragStartEvent', '[TabIndex: '+ IntToStr(ATab.Index) + ']');
+end;
 
 function TForm1.GetAppID(AHandle: THandle): string;
 var
